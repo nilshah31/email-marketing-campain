@@ -61,8 +61,17 @@ router.post('/send', async (req, res) => {
     const range = XLSX.utils.decode_range(sheet['!ref']);
     const rawData = [];
     
-    // Iterate through rows, starting from row 2 (skip header in row 1)
-    for (let rowNum = range.s.r + 1; rowNum <= range.e.r; rowNum++) {
+    // Find the last row with actual data (check column A for email)
+    let lastDataRow = range.s.r; // at least header row
+    for (let rowNum = range.s.r; rowNum <= range.e.r; rowNum++) {
+      const cellA = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 0 })];
+      if (cellA && cellA.v) {
+        lastDataRow = rowNum;
+      }
+    }
+    
+    // Iterate through rows, starting from row 2 (skip header in row 1), up to last data row
+    for (let rowNum = range.s.r + 1; rowNum <= lastDataRow; rowNum++) {
       const row = [];
       for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
         const cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: colNum });
