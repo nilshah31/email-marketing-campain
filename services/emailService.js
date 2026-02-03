@@ -19,7 +19,8 @@ const transporter = nodemailer.createTransport({
     pass: SMTP_PASS
   },
   tls: {
-    minVersion: 'TLSv1.2'
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: false
   },
   logger: true,
   debug: true
