@@ -19,17 +19,20 @@ router.post('/send', async (req, res) => {
       });
     }
 
-    // Check file type
-    const allowedMimes = [
+    // Check file type - accept Excel files and octet-stream (sometimes sent as binary)
+    const filename = req.file.originalname.toLowerCase();
+    const isXlsx = filename.endsWith('.xlsx') || filename.endsWith('.xls');
+    const isExcelMime = [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.ms-excel',
-      'text/plain' // For .xlsx files sometimes
-    ];
+      'application/x-xlsx',
+      'application/octet-stream'
+    ].includes(req.file.mimetype);
 
-    if (!allowedMimes.includes(req.file.mimetype)) {
+    if (!isXlsx && !isExcelMime) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid file type. Please upload an Excel file (.xls or .xlsx).'
+        message: `Invalid file type "${req.file.mimetype}". Please upload an Excel file (.xls or .xlsx).`
       });
     }
 
