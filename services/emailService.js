@@ -44,11 +44,27 @@ transporter.verify((error, success) => {
  */
 async function sendEmail(email, subject, body) {
   try {
+    // Escape HTML special characters while preserving formatting
+    const escapeHtml = (text) => {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, (char) => map[char]);
+    };
+
+    // Preserve newlines and spaces in HTML
+    const htmlBody = `<pre style="white-space: pre-wrap; word-wrap: break-word; font-family: Arial, sans-serif; margin: 0;">${escapeHtml(body)}</pre>`;
+
     const mailOptions = {
       from: SMTP_USER,
       to: email,
       subject: subject,
-      html: body
+      text: body,
+      html: htmlBody
     };
 
     const info = await transporter.sendMail(mailOptions);
