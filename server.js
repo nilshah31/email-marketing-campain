@@ -61,7 +61,7 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n[SERVER] Email Marketing Campaign API running on port ${PORT}`);
   console.log(`[SERVER] Environment: ${process.env.NODE_ENV}`);
   console.log(`[SERVER] Email User: ${process.env.EMAIL_USER}\n`);
