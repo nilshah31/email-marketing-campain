@@ -7,14 +7,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Configure multer for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+    fieldNameSize: 100,
+    fieldSize: 50 * 1024 * 1024
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept Excel files only
+    const filename = file.originalname.toLowerCase();
+    if (filename.endsWith('.xlsx') || filename.endsWith('.xls')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only Excel files (.xlsx, .xls) are allowed'), false);
+    }
   }
 });
 
@@ -60,9 +71,13 @@ app.use((req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
+// Start server with extended timeout
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n[SERVER] Email Marketing Campaign API running on port ${PORT}`);
   console.log(`[SERVER] Environment: ${process.env.NODE_ENV}`);
   console.log(`[SERVER] Email User: ${process.env.EMAIL_USER}\n`);
 });
+
+// Set request timeout to 5 minutes for large file uploads
+server.timeout = 5 * 60 * 1000;
+server.keepAliveTimeout = 65000;
